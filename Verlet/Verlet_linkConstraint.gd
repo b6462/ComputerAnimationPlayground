@@ -4,13 +4,20 @@ var VerletObject = preload("res://Verlet/Verlet_object.gd")
 
 var obj_1: VerletObject
 var obj_2: VerletObject
-var target_dist = 20
+
+# Gap between verlet objects
+var gap = 5
+
+# If soft link
+var soft = false
+
+var fix_force = 0.1 # 0.0001 <-> 0.5
 
 func _apply() -> void:
 	var axis: Vector2 = obj_1.position_cur - obj_2.position_cur
 	var dist = axis.length()
 	var n = axis / dist
-	var delta = target_dist - dist
-	obj_1.position_cur += 0.5 * delta * n
-	obj_2.position_cur -= 0.5 * delta * n
+	var delta = obj_1.rad + obj_2.rad + gap - dist
+	obj_1.position_cur += fix_force * delta * n
+	obj_2.position_cur -= fix_force * delta * n
 

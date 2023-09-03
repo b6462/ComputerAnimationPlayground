@@ -1,6 +1,5 @@
 extends Node2D
-# From https://www.youtube.com/watch?v=lS_qeBy3aQI&ab_channel=Pezzza%27sWork
-# C++ -> gd script
+# This script is for 2d cloth simulation
 var VerletObject = preload("res://Verlet/Verlet_object.gd")
 var update_list: Array[VerletObject] = []
 
@@ -16,26 +15,41 @@ const imagineCenter = Vector2(640, 360)
 const imagineRadius = 300
 
 func _ready():
-	# Create a linked rope bridge in the middle
-	var link_rad = 10
-	var len = 25
-	for i in range(0, len+1):
-		var new_obj = VerletObject.new()
-		new_obj.rad = link_rad
-		new_obj.position_cur = Vector2(640-(len*link_rad) + i*link_rad*2, 360)
-		new_obj.position_old = Vector2(640-(len*link_rad) + i*link_rad*2, 360)
-		if i == 0 or i == len:
-			new_obj.stationary = true
-		update_list.append(new_obj)
-		
-		# Link up
-		if i != 0:
-			var new_link = VerletConstLink.new()
-			new_link.obj_1 = update_list[i-1]
-			new_link.obj_2 = update_list[i]
-			constLink_list.append(new_link)
+	# Create a grid of verlet objects, link-constrainted to each neighbour
+	var link_rad = 2
+	var link_gap = 10
+	var link_rdn = 9 # redundancy of link gap
+	var gapper = link_rad + link_gap
+	var col = 10
+	var row = 10
+	
+	for r in range(0, row):
+		for i in range(0, col):
+			var new_obj = VerletObject.new()
+			new_obj.rad = link_rad
+			new_obj.position_cur = Vector2(640-(col*gapper) + i*gapper*2, 360-(row*gapper) + r*gapper*2)
+			new_obj.position_old = Vector2(640-(col*gapper) + i*gapper*2, 360-(row*gapper) + r*gapper*2)
+			if (i == 0 or i == col-1) and r == 0:
+				new_obj.stationary = true
+			update_list.append(new_obj)
+			
+			# Link up
+			if i != 0:
+				var horz_link = VerletConstLink.new()
+				horz_link.obj_1 = update_list[r*col+i-1]
+				horz_link.obj_2 = update_list[r*col+i]
+				horz_link.gap = link_gap + link_rdn
+				constLink_list.append(horz_link)
+				
+			if r != 0:
+				var vert_link = VerletConstLink.new()
+				vert_link.obj_1 = update_list[(r-1)*col+i]
+				vert_link.obj_2 = update_list[r*col+i]
+				vert_link.gap = link_gap + link_rdn
+				constLink_list.append(vert_link)
 	
 func _input(event):
+	'''
 	# generate new objet at mouse click position with random size
 	if event is InputEventMouseButton and event.is_pressed():
 		print(event.position)
@@ -44,6 +58,7 @@ func _input(event):
 		new_obj.position_cur = event.position
 		new_obj.position_old = event.position
 		update_list.append(new_obj)
+	'''
 
 func _process(delta):
 	# Sub-stepping for better result

@@ -7,6 +7,9 @@ var acc := Vector2(0,0)
 var rad := 20
 var stationary = false
 
+# TODO: Add velocity damping according to inertia
+var weight = 10
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
