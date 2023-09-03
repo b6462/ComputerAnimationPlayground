@@ -17,20 +17,21 @@ const imagineRadius = 300
 
 func _ready():
 	# Create a grid of verlet objects, link-constrainted to each neighbour
-	var link_rad = 0
+	var link_rad = 0 # No need for single object collision
 	var link_gap = 10
-	var link_rdn = 9 # redundancy of link gap
+	var link_rdn = 9 # redundancy of link gap to avoid over-constraining
 	var gapper = link_rad + link_gap
-	var col = 10
-	var row = 10
+	var col = 15
+	var row = 15
 	
 	for r in range(0, row):
 		for i in range(0, col):
-			var new_obj = VerletObject.new()
+			var new_obj := VerletObject.new()
 			new_obj.rad = link_rad
 			new_obj.position_cur = Vector2(640-(col*gapper) + i*gapper*2, 360-(row*gapper) + r*gapper*2)
 			new_obj.position_old = Vector2(640-(col*gapper) + i*gapper*2, 360-(row*gapper) + r*gapper*2)
-			if (i == 0 or i == col-1) and r == 0:
+			# Pin the first row
+			if r == 0:
 				new_obj.stationary = true
 			update_list.append(new_obj)
 			
@@ -55,7 +56,6 @@ func _input(event):
 			removing = true
 		else:
 			removing = false
-	
 
 func _remove_click_obj():
 	# remove closest verlet object
@@ -65,7 +65,7 @@ func _remove_click_obj():
 		var tmp_dist: Vector2 = click_pos - v_obj.position_cur
 		if tmp_dist.length() < terminal_dist:
 			# We use this buffer because erasing links in the for-loop
-			# will cause mix-up in loop-idx
+			# will cause mixing in loop-idx
 			var link_to_remove: Array[VerletConstLink] = []
 			for l_obj in constLink_list:
 				if l_obj.obj_1 == v_obj or l_obj.obj_2 == v_obj:
@@ -80,6 +80,8 @@ func _process(delta):
 	if removing:
 		_remove_click_obj()
 	
+	# TODO: Add grid optimization for better performance
+	# TODO: multi-threading?
 	# Sub-stepping for better result
 	var sub_steps = 8
 	var sub_dt = delta / sub_steps

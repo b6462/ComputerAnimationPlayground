@@ -1,6 +1,8 @@
 extends Node2D
 # From https://www.youtube.com/watch?v=lS_qeBy3aQI&ab_channel=Pezzza%27sWork
 # C++ -> gd script
+# This script shows the basic concept of a verlet object
+# Including a link-constrained bridge in the center and objects spawning at clicked position
 var VerletObject = preload("res://Verlet/Verlet_object.gd")
 var update_list: Array[VerletObject] = []
 
