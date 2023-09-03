@@ -18,11 +18,11 @@ const imagineRadius = 300
 func _ready():
 	# Create a grid of verlet objects, link-constrainted to each neighbour
 	var link_rad = 0 # No need for single object collision
-	var link_gap = 10
-	var link_rdn = 9 # redundancy of link gap to avoid over-constraining
+	var link_gap = 5
+	var link_rdn = 4 # redundancy of link gap to avoid over-constraining
 	var gapper = link_rad + link_gap
-	var col = 15
-	var row = 15
+	var col = 30
+	var row = 30
 	
 	for r in range(0, row):
 		for i in range(0, col):
@@ -88,7 +88,7 @@ func _process(delta):
 	for t in range(0, sub_steps):
 		_applyGravity()
 		_applyConstraint()
-		_solveCollisions()
+		#_solveCollisions()
 		_updatePosition(sub_dt)
 	queue_redraw()
 		
