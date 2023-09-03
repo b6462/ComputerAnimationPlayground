@@ -9,6 +9,7 @@ var constLink_list: Array[VerletConstLink] = []
 # World parameters
 var gravity: Vector2 = Vector2(0, 1000)
 var rng = RandomNumberGenerator.new()
+var removing = false
 
 # Constraints
 const imagineCenter = Vector2(640, 360)
@@ -16,7 +17,7 @@ const imagineRadius = 300
 
 func _ready():
 	# Create a grid of verlet objects, link-constrainted to each neighbour
-	var link_rad = 2
+	var link_rad = 0
 	var link_gap = 10
 	var link_rdn = 9 # redundancy of link gap
 	var gapper = link_rad + link_gap
@@ -49,18 +50,36 @@ func _ready():
 				constLink_list.append(vert_link)
 	
 func _input(event):
-	'''
-	# generate new objet at mouse click position with random size
-	if event is InputEventMouseButton and event.is_pressed():
-		print(event.position)
-		var new_obj = VerletObject.new()
-		new_obj.rad = rng.randf_range(10, 30)
-		new_obj.position_cur = event.position
-		new_obj.position_old = event.position
-		update_list.append(new_obj)
-	'''
+	if event is InputEventMouseButton:
+		if event.is_pressed():
+			removing = true
+		else:
+			removing = false
+	
+
+func _remove_click_obj():
+	# remove closest verlet object
+	var terminal_dist = 10
+	var click_pos = get_global_mouse_position()
+	for v_obj in update_list:
+		var tmp_dist: Vector2 = click_pos - v_obj.position_cur
+		if tmp_dist.length() < terminal_dist:
+			# We use this buffer because erasing links in the for-loop
+			# will cause mix-up in loop-idx
+			var link_to_remove: Array[VerletConstLink] = []
+			for l_obj in constLink_list:
+				if l_obj.obj_1 == v_obj or l_obj.obj_2 == v_obj:
+					link_to_remove.insert(0, l_obj)
+			for rmv in link_to_remove:
+				constLink_list.erase(rmv)
+			update_list.erase(v_obj)
+			break
 
 func _process(delta):
+	# Remove obj update
+	if removing:
+		_remove_click_obj()
+	
 	# Sub-stepping for better result
 	var sub_steps = 8
 	var sub_dt = delta / sub_steps

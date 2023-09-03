@@ -8,9 +8,7 @@ var obj_2: VerletObject
 # Gap between verlet objects
 var gap = 5
 
-# If soft link
-var soft = false
-
+# Soft - hard link
 var fix_force = 0.1 # 0.0001 <-> 0.5
 
 func _apply() -> void:
