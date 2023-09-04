@@ -22,7 +22,7 @@ func _ready():
 	var gapper = link_rad + link_gap
 	var col = 4
 	var row = 4
-	var bounce_force = 0.002
+	var bounce_force = 0.005
 	
 	for r in range(0, row):
 		for i in range(0, col):
@@ -73,12 +73,21 @@ func _ready():
 				vert_link.fix_force = bounce_force
 				
 	
+
+
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.is_pressed():
-			removing = true
+			print(event.position)
+			var new_obj = VerletObject.new()
+			new_obj.rad = rng.randf_range(10, 30)
+			new_obj.position_cur = event.position
+			new_obj.position_old = event.position
+			update_list.append(new_obj)
+			#removing = true
 		else:
-			removing = false
+			#removing = false
+			pass
 
 func _remove_click_obj():
 	# remove closest verlet object

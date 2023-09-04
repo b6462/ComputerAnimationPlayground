@@ -21,7 +21,7 @@ func _ready():
 func updatePosition(dt) -> void:
 	if not stationary:
 		# Add damping to velocity update
-		damping_ratio = lerp(0.5, 1.0, rad/30)
+		damping_ratio = lerp(0.8, 1.0, rad/30)
 		vel = lerp(vel, position_cur - position_old, damping_ratio)
 		vel = position_cur - position_old
 		position_old = position_cur
