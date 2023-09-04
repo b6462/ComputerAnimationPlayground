@@ -1,0 +1,74 @@
+[gd_scene load_steps=4 format=3 uid="uid://3kd352h6drah"]
+
+[ext_resource type="Script" path="res://Deform/Concept/AvgRot3D.gd" id="1_74jbp"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_4ays7"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_0oh0v"]
+
+[node name="Concept_AvgRot" type="Node3D" node_paths=PackedStringArray("ctrl_points", "tgt_point")]
+script = ExtResource("1_74jbp")
+ctrl_points = [NodePath("Ctrl_01"), NodePath("Ctrl_02"), NodePath("Ctrl_03"), NodePath("Ctrl_04")]
+tgt_point = NodePath("Target")
+
+[node name="Ctrl_01" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.28634, -1.46167, -2.19415)
+gravity_scale = 0.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ctrl_01"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("SphereMesh_4ays7")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ctrl_01"]
+transform = Transform3D(0.19971, 0, 0, 0, 0.19971, 0, 0, 0, 0.19971, 0, 0, 0)
+shape = SubResource("SphereShape3D_0oh0v")
+
+[node name="Ctrl_02" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.04803, 0.912958, -2.19415)
+gravity_scale = 0.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ctrl_02"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("SphereMesh_4ays7")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ctrl_02"]
+transform = Transform3D(0.19971, 0, 0, 0, 0.19971, 0, 0, 0, 0.19971, 0, 0, 0)
+shape = SubResource("SphereShape3D_0oh0v")
+
+[node name="Ctrl_03" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35106, -1.19911, -2.19415)
+gravity_scale = 0.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ctrl_03"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("SphereMesh_4ays7")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ctrl_03"]
+transform = Transform3D(0.19971, 0, 0, 0, 0.19971, 0, 0, 0, 0.19971, 0, 0, 0)
+shape = SubResource("SphereShape3D_0oh0v")
+
+[node name="Ctrl_04" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.34358, 1.0983, -2.19415)
+gravity_scale = 0.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ctrl_04"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("SphereMesh_4ays7")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ctrl_04"]
+transform = Transform3D(0.19971, 0, 0, 0, 0.19971, 0, 0, 0, 0.19971, 0, 0, 0)
+shape = SubResource("SphereShape3D_0oh0v")
+
+[node name="Target" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.0794)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00304461, -0.0173416, 0.83514)
+projection = 1
+size = 13.975
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
