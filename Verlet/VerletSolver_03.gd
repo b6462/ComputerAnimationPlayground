@@ -1,8 +1,5 @@
 extends Node2D
-# From https://www.youtube.com/watch?v=lS_qeBy3aQI&ab_channel=Pezzza%27sWork
-# C++ -> gd script
-# This script shows the basic concept of a verlet object
-# Including a link-constrained bridge in the center and objects spawning at clicked position
+# This script is for 2d softbody simulation
 var VerletObject = preload("res://Verlet/Verlet_object.gd")
 var update_list: Array[VerletObject] = []
 
@@ -12,42 +9,102 @@ var constLink_list: Array[VerletConstLink] = []
 # World parameters
 var gravity: Vector2 = Vector2(0, 1000)
 var rng = RandomNumberGenerator.new()
+var removing = false
 
 # Constraints
 const imagineCenter = Vector2(640, 360)
 const imagineRadius = 300
 
 func _ready():
-	# Create a linked rope bridge in the middle
-	var link_rad = 10
-	var len = 25
-	for i in range(0, len+1):
-		var new_obj = VerletObject.new()
-		new_obj.rad = link_rad
-		new_obj.position_cur = Vector2(640-(len*link_rad) + i*link_rad*2, 360)
-		new_obj.position_old = Vector2(640-(len*link_rad) + i*link_rad*2, 360)
-		if i == 0 or i == len:
-			new_obj.stationary = true
-		update_list.append(new_obj)
-		
-		# Link up
-		if i != 0:
-			var new_link = VerletConstLink.new()
-			new_link.obj_1 = update_list[i-1]
-			new_link.obj_2 = update_list[i]
-			constLink_list.append(new_link)
+	# Create a grid of verlet objects, link-constrainted to each neighbour
+	var link_rad = 5 # No need for single object collision
+	var link_gap = 20	
+	var gapper = link_rad + link_gap
+	var col = 4
+	var row = 4
+	var bounce_force = 0.002
+	
+	for r in range(0, row):
+		for i in range(0, col):
+			var new_obj := VerletObject.new()
+			new_obj.rad = link_rad
+			new_obj.position_cur = Vector2(640-(col*gapper) + i*gapper*2, 360-(row*gapper) + r*gapper*2)
+			new_obj.position_old = Vector2(640-(col*gapper) + i*gapper*2, 360-(row*gapper) + r*gapper*2)
+			# Pin the first row
+			update_list.append(new_obj)
+			
+			# Link up
+			# .-.-.
+			if i != 0:
+				var horz_link = VerletConstLink.new()
+				horz_link.obj_1 = update_list[r*col+i-1]
+				horz_link.obj_2 = update_list[r*col+i]
+				horz_link.gap = link_gap
+				horz_link.fix_force = bounce_force
+				constLink_list.append(horz_link)
+			
+			# | | |
+			# . . .
+			if r != 0:
+				var vert_link = VerletConstLink.new()
+				vert_link.obj_1 = update_list[(r-1)*col+i]
+				vert_link.obj_2 = update_list[r*col+i]
+				vert_link.gap = link_gap
+				vert_link.fix_force = bounce_force
+				constLink_list.append(vert_link)
+				
+			# . . .
+			# \ \ \
+			#   . . .
+			if i != 0 and r != 0:
+				var vert_link = VerletConstLink.new()
+				vert_link.obj_1 = update_list[(r-1)*col+i-1]
+				vert_link.obj_2 = update_list[r*col+i]
+				vert_link.gap = sqrt(2)*link_gap
+				vert_link.fix_force = bounce_force
+				constLink_list.append(vert_link)
+			
+			if i != col-1 and r != 0:
+				var vert_link = VerletConstLink.new()
+				vert_link.obj_1 = update_list[(r-1)*col+i+1]
+				vert_link.obj_2 = update_list[r*col+i]
+				vert_link.gap = sqrt(2)*link_gap
+				constLink_list.append(vert_link)
+				vert_link.fix_force = bounce_force
+				
 	
 func _input(event):
-	# generate new objet at mouse click position with random size
-	if event is InputEventMouseButton and event.is_pressed():
-		print(event.position)
-		var new_obj = VerletObject.new()
-		new_obj.rad = rng.randf_range(10, 30)
-		new_obj.position_cur = event.position
-		new_obj.position_old = event.position
-		update_list.append(new_obj)
+	if event is InputEventMouseButton:
+		if event.is_pressed():
+			removing = true
+		else:
+			removing = false
+
+func _remove_click_obj():
+	# remove closest verlet object
+	var terminal_dist = 10
+	var click_pos = get_global_mouse_position()
+	for v_obj in update_list:
+		var tmp_dist: Vector2 = click_pos - v_obj.position_cur
+		if tmp_dist.length() < terminal_dist:
+			# We use this buffer because erasing links in the for-loop
+			# will cause mixing in loop-idx
+			var link_to_remove: Array[VerletConstLink] = []
+			for l_obj in constLink_list:
+				if l_obj.obj_1 == v_obj or l_obj.obj_2 == v_obj:
+					link_to_remove.insert(0, l_obj)
+			for rmv in link_to_remove:
+				constLink_list.erase(rmv)
+			update_list.erase(v_obj)
+			break
 
 func _process(delta):
+	# Remove obj update
+	if removing:
+		_remove_click_obj()
+	
+	# TODO: Add grid optimization for better performance
+	# TODO: multi-threading?
 	# Sub-stepping for better result
 	var sub_steps = 8
 	var sub_dt = delta / sub_steps
