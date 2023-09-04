@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://diqe2g2b4ff7x"]
+
+[ext_resource type="Script" path="res://Kabsch/Kabsch_01.gd" id="1_2r03f"]
+
+[node name="Kabsch" type="Node2D"]
+script = ExtResource("1_2r03f")

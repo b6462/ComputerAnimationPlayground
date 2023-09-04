@@ -1,6 +1,8 @@
 extends Node2D
 # CCDIK
 
+const ITERATIONS = 32
+
 var base_point := Vector2(640, 360)
 var joints = [
 	[80, 0],
@@ -22,7 +24,8 @@ func get_joint_pos(idx: int) -> Vector2:
 		return pos_buf
 
 func update_ik(target: Vector2) -> void:
-	_backward_pass(target)
+	for i in range(0, ITERATIONS):
+		_backward_pass(target)
 		
 func _backward_pass(target: Vector2) -> void:
 	for i in range(joints.size()-1, -1, -1):
