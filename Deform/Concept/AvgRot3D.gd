@@ -1,5 +1,5 @@
 extends Node
-
+# NOTE: To move the control spheres, go to remote mode and move it in the editor
 @export var ctrl_points: Array[Node3D]
 @export var tgt_point: Node3D
 var displacements: PackedVector3Array
@@ -10,8 +10,6 @@ func _ready():
 		displacements.append((ctrl.position - tgt_point.position).normalized())
 
 func _process(delta):
-	#ctrl_points[0].position += Vector3(0,0.5*delta,0)
-	
 	var rotation := Vector3(0,0,0)
 	var activePoints = 0
 	for i in range(0, ctrl_points.size()):
