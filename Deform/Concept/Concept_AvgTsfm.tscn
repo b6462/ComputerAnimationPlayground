@@ -1,12 +1,23 @@
-[gd_scene load_steps=5 format=3 uid="uid://cs2k1fi543p78"]
+[gd_scene load_steps=7 format=3 uid="uid://cs2k1fi543p78"]
 
 [ext_resource type="Script" path="res://Deform/Concept/AvgTsfm3D.gd" id="1_5g5tt"]
+[ext_resource type="Shader" path="res://Deform/Concept/Wireframe.gdshader" id="2_8jxv4"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_cqcsy"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_4skoj"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1hcbq"]
+render_priority = 0
+shader = ExtResource("2_8jxv4")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/wire_color = Color(0, 0, 0, 1)
+shader_parameter/wire_width = 1.0
+shader_parameter/wire_smoothness = 0.01
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_6nmlh"]
+lightmap_size_hint = Vector2i(27, 27)
+material = SubResource("ShaderMaterial_1hcbq")
 size = Vector2(5, 5)
 subdivide_width = 10
 subdivide_depth = 10

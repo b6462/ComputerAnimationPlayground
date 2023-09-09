@@ -85,4 +85,5 @@ func _process(delta):
 	for vtx in range(mdt.get_vertex_count()):
 		mdt.set_vertex(vtx, dfrm_mesh_vts[vtx])
 	mdt.commit_to_surface(dfrm_mesh)
-	target_mesh.mesh = dfrm_mesh
+	#target_mesh.mesh = dfrm_mesh
+	#mdt.create_from_surface(dfrm_mesh, 0)
