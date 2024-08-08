@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cusjpnqreyry2"]
 
-[ext_resource type="Script" path="res://Verlet/VerletSolver_03.gd" id="1_b33sq"]
+[ext_resource type="Script" path="res://Verlet/VerletSolver_02.gd" id="1_mlxo8"]
 
 [node name="VerletIntegration" type="Node2D"]
-script = ExtResource("1_b33sq")
+script = ExtResource("1_mlxo8")

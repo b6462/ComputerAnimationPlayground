@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Computer Animation Playground"
-run/main_scene="res://Deform/Concept/Concept_AvgTsfm.tscn"
-config/features=PackedStringArray("4.1", "Forward Plus")
+run/main_scene="res://Verlet/VerletIntegration.tscn"
+config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
 
 [display]
