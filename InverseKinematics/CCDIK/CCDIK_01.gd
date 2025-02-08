@@ -1,6 +1,6 @@
 extends Node2D
 # CCDIK
-
+# https://zalo.github.io/blog/inverse-kinematics/
 const ITERATIONS = 32
 
 var base_point := Vector2(640, 360)
