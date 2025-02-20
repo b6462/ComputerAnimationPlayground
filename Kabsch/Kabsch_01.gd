@@ -10,7 +10,7 @@ var src_point_count = 5
 var tgt_point_count = src_point_count
 
 var point_sparseness = 20
-var cloud_likeliness = 1
+var cloud_likeliness = 0.8
 
 var rng = RandomNumberGenerator.new()
 
@@ -39,7 +39,8 @@ func generateSourcePointCloud():
 		var tmp_point = Node3D.new()
 		tmp_point.name = "src_point_" + str(i)
 		tmp_point.position = random_pos(point_sparseness)
-		src_root.add_child(tmp_point)
+		#src_root.add_child(tmp_point)
+		add_child(tmp_point)
 		tmp_pt_list.append(tmp_point)
 		var tmp_sphere = make_debug_sphere(1.0, g_mat)
 		tmp_point.add_child(tmp_sphere)
@@ -54,13 +55,14 @@ func generateTargetPointCloud(src_root, src_points, likeliness):
 	for i in range(tgt_point_count):
 		var tmp_point = Node3D.new()
 		tmp_point.name = "tgt_point_" + str(i)
-		if i < len(src_points) and likeliness > 0:
+		if likeliness > 0:
 			# If target point cloud has less point than source, use source position with jitter
 			tmp_point.position = src_points[i].position*likeliness + random_pos(point_sparseness*(1-likeliness))
 		else:
 			# If cannot find corresponding source point, create point randomly
 			tmp_point.position = random_pos(point_sparseness)
-		tgt_root.add_child(tmp_point)
+		#tgt_root.add_child(tmp_point)
+		add_child(tmp_point)
 		tmp_pt_list.append(tmp_point)
 		var tmp_sphere = make_debug_sphere(1.0, r_mat)
 		tmp_point.add_child(tmp_sphere)
@@ -108,17 +110,13 @@ func SolveKabsch():
 	print("covariance:" + str(covariance))
 	# Third, acquire polar decomposition of matrix
 	var curQuaternion = Quaternion(0,0,0,1)
-	var quatBasis := Basis(curQuaternion)
-	var iterations = 100
+	var iterations = 20
 	for iter in range(0, iterations):
-		quatBasis = Basis(curQuaternion)
+		var quatBasis := Basis(curQuaternion)
 		print("Quat basis:" + str(quatBasis))
-		var omegaDenom = abs((quatBasis.x).dot(covariance[0]) 
-		+ (quatBasis.y).dot(covariance[1]) 
-		+ (quatBasis.z).dot(covariance[2])+0.00000001)
-		var omega:Vector3 = (quatBasis.x).cross(covariance[0])
-		+ (quatBasis.y).cross(covariance[1])
-		+ (quatBasis.z).cross(covariance[2])
+		# NOTE: Do not split the following long lines into multi-line like python, gdscript does not support it.
+		var omegaDenom = abs((quatBasis.x).dot(covariance[0]) + (quatBasis.y).dot(covariance[1]) + (quatBasis.z).dot(covariance[2])) + 0.00000001
+		var omega:Vector3 = (quatBasis.x).cross(covariance[0]) + (quatBasis.y).cross(covariance[1]) + (quatBasis.z).cross(covariance[2])
 		#print("omegaDenom:" + str(omegaDenom))
 		#print("omega:" + str(omega))
 		omega /= omegaDenom
@@ -128,10 +126,12 @@ func SolveKabsch():
 			break
 		#print(w)
 		#print(omega.normalized())
-		print("=====")
-		curQuaternion = Quaternion(omega/w, w) *curQuaternion
-		#curQuaternion = curQuaternion.normalized()
+		#print("=====")
+		curQuaternion = Quaternion(omega.normalized(), w) * curQuaternion
+		curQuaternion = curQuaternion.normalized()
 	print(curQuaternion)
+	print(curQuaternion.get_euler())
+	print(curQuaternion.get_angle())
 	
 	# Now we apply all transforms
 	# We rotate the src_points data, as they are already mean-centered
@@ -139,7 +139,8 @@ func SolveKabsch():
 		src_points_mean_pos[i] = curQuaternion * src_points_mean_pos[i]
 	# Then we set the actual position of these points, by adding the delta value back to it
 	for i in range(0, len(src_points)):
-		src_points[i].position = src_points_mean_pos[i] + tgt_center_delta
+		src_points[i].position = src_points_mean_pos[i]# + tgt_center_delta
+		tgt_points[i].position = tgt_points_mean_pos[i]
 	
 
 # Called when the node enters the scene tree for the first time.
