@@ -1,16 +1,16 @@
 extends Node
 
-
+# Source: https://zalo.github.io/blog/kabsch/
 var src_root : Node3D
 var src_points : Array[Node3D]
 var tgt_root : Node3D
 var tgt_points : Array[Node3D]
 
 var src_point_count = 5
-var tgt_point_count = 5
+var tgt_point_count = src_point_count
 
 var point_sparseness = 20
-var cloud_likeliness = 0.8
+var cloud_likeliness = 1
 
 var rng = RandomNumberGenerator.new()
 
@@ -23,6 +23,13 @@ func random_pos(sparseness):
 	var tmp_z = rng.randf_range(-sparseness, sparseness)
 	return Vector3(tmp_x, tmp_y, tmp_z)
 
+func get_average_center(points : Array[Node3D]):
+	var center := Vector3(0,0,0)
+	for i: Node3D in points:
+		center += i.position
+	center /= len(points)
+	return center
+
 func generateSourcePointCloud():
 	var src_root = Node3D.new()
 	var tmp_pt_list :Array[Node3D] = []
@@ -32,10 +39,9 @@ func generateSourcePointCloud():
 		var tmp_point = Node3D.new()
 		tmp_point.name = "src_point_" + str(i)
 		tmp_point.position = random_pos(point_sparseness)
-		print(tmp_point.position)
 		src_root.add_child(tmp_point)
 		tmp_pt_list.append(tmp_point)
-		var tmp_sphere = make_debug_sphere(1.0, r_mat)
+		var tmp_sphere = make_debug_sphere(1.0, g_mat)
 		tmp_point.add_child(tmp_sphere)
 	return [src_root, tmp_pt_list]
 	
@@ -56,7 +62,7 @@ func generateTargetPointCloud(src_root, src_points, likeliness):
 			tmp_point.position = random_pos(point_sparseness)
 		tgt_root.add_child(tmp_point)
 		tmp_pt_list.append(tmp_point)
-		var tmp_sphere = make_debug_sphere(1.0, g_mat)
+		var tmp_sphere = make_debug_sphere(1.0, r_mat)
 		tmp_point.add_child(tmp_sphere)
 	return [tgt_root, tmp_pt_list]
 
@@ -73,11 +79,68 @@ func createScene():
 	tgt_points = tmp_tgt_data[1]
 
 func SolveKabsch():
-	# Solver
+	# Given valid point clouds, calculate optimal transforms
 	# Validate points
 	if not (src_root and tgt_root):
 		return
-	pass
+	# Calculate optimal translation
+	var opt_trans = get_average_center(tgt_points) - get_average_center(src_points)
+	print(opt_trans)
+		
+	# Calculate optimal rotation
+	
+	# First, get mean-centered position data of all points
+	var src_center_delta:Vector3 = get_average_center(src_points)
+	var tgt_center_delta:Vector3 = get_average_center(tgt_points)
+	var src_points_mean_pos : Array[Vector3]
+	for spt in src_points:
+		src_points_mean_pos.append(spt.position - src_center_delta)
+	var tgt_points_mean_pos : Array[Vector3]
+	for tpt in tgt_points:
+		tgt_points_mean_pos.append(tpt.position - tgt_center_delta)
+		
+	# Second, calculate 3x3 cross-covariance matrix
+	var covariance = [Vector3(0,0,0),Vector3(0,0,0),Vector3(0,0,0)]
+	for i in range(0, 3):
+		for j in range(0, 3):
+			for k in range(0, len(src_points)):
+				covariance[i][j] += src_points_mean_pos[k][i] * tgt_points_mean_pos[k][j]
+	print("covariance:" + str(covariance))
+	# Third, acquire polar decomposition of matrix
+	var curQuaternion = Quaternion(0,0,0,1)
+	var quatBasis := Basis(curQuaternion)
+	var iterations = 100
+	for iter in range(0, iterations):
+		quatBasis = Basis(curQuaternion)
+		print("Quat basis:" + str(quatBasis))
+		var omegaDenom = abs((quatBasis.x).dot(covariance[0]) 
+		+ (quatBasis.y).dot(covariance[1]) 
+		+ (quatBasis.z).dot(covariance[2])+0.00000001)
+		var omega:Vector3 = (quatBasis.x).cross(covariance[0])
+		+ (quatBasis.y).cross(covariance[1])
+		+ (quatBasis.z).cross(covariance[2])
+		#print("omegaDenom:" + str(omegaDenom))
+		#print("omega:" + str(omega))
+		omega /= omegaDenom
+		print("omega:" + str(omega))
+		var w = omega.length()
+		if w < 0.00000001:
+			break
+		#print(w)
+		#print(omega.normalized())
+		print("=====")
+		curQuaternion = Quaternion(omega/w, w) *curQuaternion
+		#curQuaternion = curQuaternion.normalized()
+	print(curQuaternion)
+	
+	# Now we apply all transforms
+	# We rotate the src_points data, as they are already mean-centered
+	for i in range(0, len(src_points_mean_pos)):
+		src_points_mean_pos[i] = curQuaternion * src_points_mean_pos[i]
+	# Then we set the actual position of these points, by adding the delta value back to it
+	for i in range(0, len(src_points)):
+		src_points[i].position = src_points_mean_pos[i] + tgt_center_delta
+	
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -92,8 +155,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	if src_root and tgt_root:
-		SolveKabsch()
+	pass
 
 func make_debug_sphere(size, mat):
 	var sphere = SphereMesh.new()
@@ -107,3 +169,8 @@ func make_debug_sphere(size, mat):
 	var node = MeshInstance3D.new()
 	node.mesh = sphere
 	return node
+
+
+func _on_solve_button_pressed() -> void:
+	if src_root and tgt_root:
+		SolveKabsch()

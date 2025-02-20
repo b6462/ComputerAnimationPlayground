@@ -24,3 +24,14 @@ transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 
 environment = SubResource("Environment_dsu2o")
 attributes = SubResource("CameraAttributesPractical_w20x6")
 far = 8000.0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Button" type="Button" parent="CanvasLayer"]
+offset_left = 9.0
+offset_top = 12.0
+offset_right = 78.0
+offset_bottom = 32.0
+text = "Solve"
+
+[connection signal="pressed" from="CanvasLayer/Button" to="." method="_on_solve_button_pressed"]
