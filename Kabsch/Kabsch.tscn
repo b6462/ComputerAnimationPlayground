@@ -1,6 +1,26 @@
-[gd_scene load_steps=2 format=3 uid="uid://diqe2g2b4ff7x"]
+[gd_scene load_steps=6 format=3 uid="uid://diqe2g2b4ff7x"]
 
 [ext_resource type="Script" path="res://Kabsch/Kabsch_01.gd" id="1_2r03f"]
 
-[node name="Kabsch" type="Node2D"]
+[sub_resource type="Environment" id="Environment_35ua2"]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_70vc0"]
+
+[sub_resource type="Environment" id="Environment_dsu2o"]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_w20x6"]
+
+[node name="Node3D" type="Node3D"]
 script = ExtResource("1_2r03f")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_35ua2")
+camera_attributes = SubResource("CameraAttributesPractical_70vc0")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 50, 50)
+environment = SubResource("Environment_dsu2o")
+attributes = SubResource("CameraAttributesPractical_w20x6")
+far = 8000.0
