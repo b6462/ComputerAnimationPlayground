@@ -1,6 +1,10 @@
 extends Node
 
-# Source: https://zalo.github.io/blog/kabsch/
+var input_rotating = false
+var prev_mouse_position
+var next_mouse_position
+var input_rotation_sensitivity = 0.2
+
 var src_root : Node3D
 var src_points : Array[Node3D]
 var tgt_root : Node3D
@@ -20,6 +24,19 @@ var rng = RandomNumberGenerator.new()
 
 var r_mat = StandardMaterial3D.new()
 var g_mat = StandardMaterial3D.new()
+
+func make_debug_sphere(size, mat):
+	var sphere = SphereMesh.new()
+	sphere.radial_segments = 4
+	sphere.rings = 4
+	sphere.radius = size
+	sphere.height = size*2
+	
+	sphere.surface_set_material(0, mat)
+	# Add to meshinstance in the right place.
+	var node = MeshInstance3D.new()
+	node.mesh = sphere
+	return node
 
 func random_pos(sparseness):
 	var tmp_x = rng.randf_range(-sparseness, sparseness)
@@ -91,6 +108,7 @@ func createScene():
 	bSolved = false
 
 func SolveKabsch():
+	# Reference: https://zalo.github.io/blog/kabsch/
 	# Given valid point clouds, calculate optimal transforms
 	# Validate points
 	if not (src_root and tgt_root):
@@ -165,19 +183,25 @@ func _process(delta):
 	if bAutoSolve and not bSolved:
 		SolveKabsch()
 		bSolved = true
-
-func make_debug_sphere(size, mat):
-	var sphere = SphereMesh.new()
-	sphere.radial_segments = 4
-	sphere.rings = 4
-	sphere.radius = size
-	sphere.height = size*2
-	
-	sphere.surface_set_material(0, mat)
-	# Add to meshinstance in the right place.
-	var node = MeshInstance3D.new()
-	node.mesh = sphere
-	return node
+	if (Input.is_action_just_pressed("ui_left_click")):
+		input_rotating = true
+		prev_mouse_position = get_viewport().get_mouse_position()
+	if (Input.is_action_just_released("ui_left_click")):
+		input_rotating = false
+		
+	if (Input.is_action_just_pressed("ui_scroll_down")):
+		$Camera3D.position.z += 1
+	if (Input.is_action_just_pressed("ui_scroll_up")):
+		$Camera3D.position.z -= 1
+		
+	if (input_rotating):
+		next_mouse_position = get_viewport().get_mouse_position()
+		if src_root and tgt_root:
+			src_root.rotate_y((next_mouse_position.x - prev_mouse_position.x) * input_rotation_sensitivity * delta)
+			src_root.rotate_x((next_mouse_position.y - prev_mouse_position.y) * input_rotation_sensitivity * delta)
+			tgt_root.rotate_y((next_mouse_position.x - prev_mouse_position.x) * input_rotation_sensitivity * delta)
+			tgt_root.rotate_x((next_mouse_position.y - prev_mouse_position.y) * input_rotation_sensitivity * delta)
+		prev_mouse_position = next_mouse_position
 
 
 func _on_solve_button_pressed() -> void:

@@ -22,7 +22,7 @@ camera_attributes = SubResource("CameraAttributesPractical_70vc0")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 50, 50)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 50)
 environment = SubResource("Environment_dsu2o")
 attributes = SubResource("CameraAttributesPractical_w20x6")
 far = 8000.0
